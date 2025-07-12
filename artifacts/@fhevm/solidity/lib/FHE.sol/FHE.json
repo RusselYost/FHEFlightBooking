@@ -1,0 +1,39 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "FHE",
+  "sourceName": "@fhevm/solidity/lib/FHE.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "HandlesAlreadySavedForRequestID",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidKMSSignatures",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoHandleFoundForRequestID",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "requestID",
+          "type": "uint256"
+        }
+      ],
+      "name": "DecryptionFulfilled",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea264697066735822122079f4ab0699ef1f763d556be57f005ab0064edc87d5c726545aebd4421c56f3dc64736f6c63430008180033",
+  "deployedBytecode": "0x600080fdfea264697066735822122079f4ab0699ef1f763d556be57f005ab0064edc87d5c726545aebd4421c56f3dc64736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
