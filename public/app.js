@@ -1,13 +1,9 @@
-// Import fhevmjs for FHE operations
-import { createInstance } from 'fhevmjs';
-
 class ConfidentialFlightBooking {
     constructor() {
         this.provider = null;
         this.signer = null;
         this.contract = null;
         this.userAccount = null;
-        this.fhevmInstance = null;
 
         this.contractAddress = "0xfdf50F46FDD1e307F80C89d5fa5c7c1E49ddae7C"; // Update with your deployed contract address
         this.contractABI = [
@@ -16,8 +12,8 @@ class ConfidentialFlightBooking {
             "function getFlightInfo(uint32 _flightId) external view returns (string memory origin, string memory destination, uint256 departureTime, uint256 arrivalTime, uint16 totalSeats, uint16 availableSeats, bool isActive, address airline)",
             "function updateFlightStatus(uint32 _flightId, bool _isActive) external",
 
-            // Booking Functions (updated for new parameters)
-            "function bookFlight(uint32 _flightId, uint32 _passportNumber, string memory _encryptedName, uint16 _age, uint32 _preferredSeat, bool _hasSpecialNeeds, uint32 _frequentFlyerNumber, bool _isVIP, bool _hasInsurance) external payable",
+            // Booking Functions
+            "function bookFlight(uint32 _flightId, uint32 _passportNumber, string memory _encryptedName, uint16 _age, uint32 _preferredSeat, bool _hasSpecialNeeds) external payable",
             "function confirmBooking(uint32 _bookingId) external",
             "function cancelBooking(uint32 _bookingId) external",
 
@@ -41,7 +37,6 @@ class ConfidentialFlightBooking {
 
     async init() {
         await this.connectWallet();
-        await this.initFHEVM();
         this.setupEventListeners();
         await this.loadFlights();
         await this.loadUserBookings();
@@ -71,34 +66,6 @@ class ConfidentialFlightBooking {
             console.error("Error connecting to wallet:", error);
             this.showError("Failed to connect to wallet");
             this.updateConnectionStatus(false);
-        }
-    }
-
-    /**
-     * Initialize FHEVM instance for encryption operations
-     * Uses fhevmjs to handle client-side encryption
-     */
-    async initFHEVM() {
-        try {
-            console.log("Initializing FHEVM instance...");
-
-            // Get network chainId
-            const network = await this.provider.getNetwork();
-            const chainId = Number(network.chainId);
-
-            // Create FHEVM instance with network configuration
-            this.fhevmInstance = await createInstance({
-                chainId,
-                networkUrl: window.ethereum.rpcUrl || 'https://sepolia.infura.io/v3/',
-                gatewayUrl: 'https://gateway.sepolia.zama.ai',
-                aclAddress: CONFIG.ACL_CONTRACT_ADDRESS,
-                kmsVerifierAddress: CONFIG.KMS_VERIFIER_ADDRESS
-            });
-
-            console.log("FHEVM instance initialized successfully");
-        } catch (error) {
-            console.error("Error initializing FHEVM:", error);
-            this.showError("Failed to initialize FHE encryption. Please check your network connection.");
         }
     }
 

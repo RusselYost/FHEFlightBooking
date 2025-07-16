@@ -1,31 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { FHE, euint16, euint32, euint64, ebool } from "@fhevm/solidity/lib/FHE.sol";
+import { FHE, euint16, euint32, ebool } from "@fhevm/solidity/lib/FHE.sol";
 import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
-import { Pausable, PauserSet } from "./PauserSet.sol";
 
-/**
- * @title ConfidentialFlightBooking
- * @notice Privacy-preserving flight booking system using Fully Homomorphic Encryption
- * @dev Implements FHE operations for confidential passenger data and booking management
- *
- * Key FHE Features:
- * - Multiple encrypted types (euint16, euint32, euint64, ebool)
- * - Complex encrypted comparisons and logic
- * - Gateway integration for decryption callbacks
- * - PauserSet mechanism for emergency controls
- * - Fail-closed design with input proof verification
- */
-contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
+contract ConfidentialFlightBooking is SepoliaConfig {
 
     address public owner;
     uint32 public nextFlightId;
     uint32 public nextBookingId;
-
-    // Gateway callback tracking
-    mapping(uint256 => uint32) private requestIdToBookingId;
-    mapping(uint32 => bool) private pendingRefunds;
 
     struct Flight {
         uint32 flightId;
@@ -49,8 +32,6 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
         uint256 bookingTime;
         bool isConfirmed;
         bool isCancelled;
-        euint64 loyaltyPoints;  // Additional encrypted field
-        ebool hasInsurance;     // Additional encrypted boolean
     }
 
     struct PassengerData {
@@ -58,8 +39,6 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
         string encryptedName;
         euint16 age;
         bool hasSpecialNeeds;
-        euint32 frequentFlyerNumber;
-        ebool isVIP;
     }
 
     mapping(uint32 => Flight) public flights;
@@ -73,10 +52,6 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
     event BookingConfirmed(uint32 indexed bookingId);
     event BookingCancelled(uint32 indexed bookingId);
     event PaymentProcessed(uint32 indexed bookingId, address indexed passenger);
-    event RefundInitiated(uint32 indexed bookingId, uint256 requestId);
-    event RefundProcessed(uint32 indexed bookingId, uint32 seatNumber, address passenger);
-    event LoyaltyPointsAwarded(uint32 indexed bookingId, address indexed passenger);
-    event DecryptionRequested(uint256 indexed requestId, uint32 indexed bookingId);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not authorized");
@@ -97,13 +72,7 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
         _;
     }
 
-    /**
-     * @notice Initialize contract with PauserSet for emergency controls
-     * @param _pauserSet Address of deployed PauserSet contract
-     * @dev Fail-closed design: Contract will revert if pauserSet is invalid
-     */
-    constructor(address _pauserSet) Pausable(_pauserSet) {
-        require(_pauserSet != address(0), "Invalid PauserSet address");
+    constructor() {
         owner = msg.sender;
         nextFlightId = 1;
         nextBookingId = 1;
@@ -142,24 +111,14 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
         nextFlightId++;
     }
 
-    /**
-     * @notice Book a flight with encrypted passenger data
-     * @dev Demonstrates multiple FHE types and operations
-     * - Input validation with encrypted comparisons
-     * - Access control with whenNotPaused modifier
-     * - Fail-closed: Transaction fails if conditions not met
-     */
     function bookFlight(
         uint32 _flightId,
         uint32 _passportNumber,
         string memory _encryptedName,
         uint16 _age,
         uint32 _preferredSeat,
-        bool _hasSpecialNeeds,
-        uint32 _frequentFlyerNumber,
-        bool _isVIP,
-        bool _hasInsurance
-    ) external payable validFlight(_flightId) whenNotPaused {
+        bool _hasSpecialNeeds
+    ) external payable validFlight(_flightId) {
         Flight storage flight = flights[_flightId];
         require(flight.availableSeats > 0, "No available seats");
 
@@ -173,19 +132,10 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
 
         require(assignedSeat > 0, "No seats available");
 
-        // Encrypt all sensitive data using FHE
         euint32 encryptedPassport = FHE.asEuint32(_passportNumber);
         euint16 encryptedAge = FHE.asEuint16(_age);
         euint32 encryptedSeat = FHE.asEuint32(assignedSeat);
         euint16 paidAmount = FHE.asEuint16(uint16(msg.value));
-        euint32 encryptedFFN = FHE.asEuint32(_frequentFlyerNumber);
-        ebool encryptedIsVIP = FHE.asEbool(_isVIP);
-        ebool encryptedHasInsurance = FHE.asEbool(_hasInsurance);
-
-        // Calculate initial loyalty points (100 base + 50 if VIP)
-        euint64 basePoints = FHE.asEuint64(100);
-        euint64 vipBonus = FHE.asEuint64(50);
-        euint64 loyaltyPoints = FHE.select(encryptedIsVIP, FHE.add(basePoints, vipBonus), basePoints);
 
         bookings[nextBookingId] = Booking({
             bookingId: nextBookingId,
@@ -195,45 +145,31 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
             seatNumber: encryptedSeat,
             bookingTime: block.timestamp,
             isConfirmed: false,
-            isCancelled: false,
-            loyaltyPoints: loyaltyPoints,
-            hasInsurance: encryptedHasInsurance
+            isCancelled: false
         });
 
         passengerDetails[nextBookingId] = PassengerData({
             passportNumber: encryptedPassport,
             encryptedName: _encryptedName,
             age: encryptedAge,
-            hasSpecialNeeds: _hasSpecialNeeds,
-            frequentFlyerNumber: encryptedFFN,
-            isVIP: encryptedIsVIP
+            hasSpecialNeeds: _hasSpecialNeeds
         });
 
         passengerBookings[msg.sender].push(nextBookingId);
         seatOccupied[_flightId][assignedSeat] = true;
         flight.availableSeats--;
 
-        // Allow contract and passenger to access encrypted data
         FHE.allowThis(encryptedPassport);
         FHE.allowThis(encryptedAge);
         FHE.allowThis(encryptedSeat);
         FHE.allowThis(paidAmount);
-        FHE.allowThis(encryptedFFN);
-        FHE.allowThis(encryptedIsVIP);
-        FHE.allowThis(encryptedHasInsurance);
-        FHE.allowThis(loyaltyPoints);
 
         FHE.allow(encryptedPassport, msg.sender);
         FHE.allow(encryptedAge, msg.sender);
         FHE.allow(encryptedSeat, msg.sender);
         FHE.allow(paidAmount, msg.sender);
-        FHE.allow(encryptedFFN, msg.sender);
-        FHE.allow(encryptedIsVIP, msg.sender);
-        FHE.allow(encryptedHasInsurance, msg.sender);
-        FHE.allow(loyaltyPoints, msg.sender);
 
         emit BookingCreated(nextBookingId, _flightId, msg.sender);
-        emit LoyaltyPointsAwarded(nextBookingId, msg.sender);
         nextBookingId++;
     }
 
@@ -247,13 +183,7 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
         emit PaymentProcessed(_bookingId, bookings[_bookingId].passenger);
     }
 
-    /**
-     * @notice Cancel a booking (simplified version without decryption oracle)
-     * @dev Demonstrates booking cancellation without Gateway integration
-     * - Fail-closed: Only authorized users can cancel
-     * - Note: In production, use DecryptionOracle for encrypted data handling
-     */
-    function cancelBooking(uint32 _bookingId) external whenNotPaused {
+    function cancelBooking(uint32 _bookingId) external {
         Booking storage booking = bookings[_bookingId];
         require(
             msg.sender == booking.passenger ||
@@ -262,43 +192,30 @@ contract ConfidentialFlightBooking is SepoliaConfig, Pausable {
             "Not authorized"
         );
         require(!booking.isCancelled, "Already cancelled");
-        require(!booking.isConfirmed, "Cannot cancel confirmed booking");
 
         booking.isCancelled = true;
         flights[booking.flightId].availableSeats++;
 
+        bytes32[] memory cts = new bytes32[](1);
+        cts[0] = FHE.toBytes32(booking.seatNumber);
+        FHE.requestDecryption(cts, this.processCancellation.selector);
+
         emit BookingCancelled(_bookingId);
-
-        // Note: Actual refund processing would require decryption oracle integration
-        // For testing purposes, refund can be processed off-chain
     }
 
-    /**
-     * @notice Check if an age is valid for booking (encrypted comparison)
-     * @dev Demonstrates encrypted comparison operations
-     */
-    function isAgeValid(euint16 _age) public returns (ebool) {
-        euint16 minAge = FHE.asEuint16(18);
-        euint16 maxAge = FHE.asEuint16(120);
-
-        ebool isAboveMin = FHE.ge(_age, minAge);
-        ebool isBelowMax = FHE.le(_age, maxAge);
-
-        return FHE.and(isAboveMin, isBelowMax);
-    }
-
-    /**
-     * @notice Award bonus loyalty points (demonstrates FHE arithmetic)
-     */
-    function awardBonusPoints(uint32 _bookingId, uint64 _bonusPoints) external onlyOwner {
-        Booking storage booking = bookings[_bookingId];
-        require(!booking.isCancelled, "Booking cancelled");
-
-        euint64 bonus = FHE.asEuint64(_bonusPoints);
-        booking.loyaltyPoints = FHE.add(booking.loyaltyPoints, bonus);
-
-        FHE.allowThis(booking.loyaltyPoints);
-        FHE.allow(booking.loyaltyPoints, booking.passenger);
+    function processCancellation(
+        uint256 requestId,
+        uint32 seatNumber,
+        bytes[] memory signatures
+    ) external {
+        bytes memory decryptedValues = abi.encode(seatNumber);
+        bytes memory packedSignatures = "";
+        for (uint256 i = 0; i < signatures.length; i++) {
+            packedSignatures = abi.encodePacked(packedSignatures, signatures[i]);
+        }
+        FHE.checkSignatures(requestId, decryptedValues, packedSignatures);
+        // Process refund and free up seat
+        // TODO: Implement refund logic and seat freeing
     }
 
     function _findAvailableSeat(uint32 _flightId, uint16 _totalSeats) private view returns (uint32) {
