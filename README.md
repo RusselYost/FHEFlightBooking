@@ -5,13 +5,51 @@
 [![Live Demo](https://img.shields.io/badge/Live-Demo-blue)](https://fhe-flight-booking.vercel.app/)
 [![Contract](https://img.shields.io/badge/Sepolia-0xfdf50F46FDD1e307F80C89d5fa5c7c1E49ddae7C-green)](https://sepolia.etherscan.io/address/0xfdf50F46FDD1e307F80C89d5fa5c7c1E49ddae7C)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-purple)](https://vitejs.dev/)
 
 ## 🌐 Links
 
 - **Live Application**: [https://fhe-flight-booking.vercel.app/](https://fhe-flight-booking.vercel.app/)
-- **GitHub Repository**: [https://github.com/RusselYost/FHEFlightBooking](https://github.com/RusselYost/FHEFlightBooking)
 - **Smart Contract**: `0xfdf50F46FDD1e307F80C89d5fa5c7c1E49ddae7C` (Sepolia Testnet)
 - **Demo Video**: Download `demo.mp4` to watch the complete demonstration
+
+## 🎯 Frontend Implementations
+
+This project offers **two production-ready frontend implementations**:
+
+| Feature | Next.js 14 Version | React + Vite Version |
+|---------|-------------------|---------------------|
+| **Location** | `/frontend` | `/ConfidentialFlightBooking` |
+| **Framework** | Next.js 14 (App Router) | React 18 + Vite 5 |
+| **Web3 Library** | wagmi 2.x + RainbowKit | ethers.js 6.7 |
+| **FHE Integration** | fhevmjs 0.6.2 | @fhevm/sdk 0.3 |
+| **Styling** | Tailwind CSS + Radix UI | CSS3 with modern features |
+| **Build Tool** | ESBuild (Next.js) | Vite |
+| **State Management** | React Context + wagmi | Custom React Hooks |
+| **Routing** | App Router (file-based) | Single Page (SPA) |
+| **Server Features** | Server Components, API Routes | Client-side only |
+| **Bundle Size** | Larger (full-featured) | Smaller (lightweight) |
+| **Build Speed** | Moderate | Very Fast |
+| **Best For** | Production apps, SEO, Full features | Prototypes, Learning, Quick dev |
+| **Documentation** | `frontend/README.md` | `README.md` + `README-REACT.md` |
+
+### 📦 Quick Comparison
+
+**Choose Next.js Version if you need:**
+- ✅ Server-side rendering (SSR)
+- ✅ SEO optimization
+- ✅ Advanced routing and API routes
+- ✅ Production-ready with RainbowKit
+- ✅ Full-featured wallet integration
+
+**Choose React + Vite Version if you need:**
+- ✅ Lightning-fast development builds
+- ✅ Simpler project structure
+- ✅ Learning FHE SDK basics
+- ✅ Standalone React application
+- ✅ Custom hooks pattern
 
 ## 📖 Core Concept
 
@@ -70,11 +108,20 @@
 
 ### 🎨 User Experience
 
+**Next.js Version:**
 - **Glassmorphism UI**: Modern, translucent design with dark theme
 - **Real-Time Updates**: Transaction history with blockchain event tracking
 - **Wallet Integration**: RainbowKit for seamless Web3 connection
 - **Responsive Design**: Mobile-friendly interface with Tailwind CSS
 - **Loading States**: Clear feedback during encryption and transactions
+
+**React + Vite Version:**
+- **Component-Based**: Modular React architecture with reusable components
+- **Custom Hooks**: useWallet, useFlights, useBookings for state management
+- **Auto-Refresh**: Flights auto-update every 30 seconds
+- **Type Safety**: Full TypeScript support for better DX
+- **Modern Styling**: CSS3 with gradients, animations, and transitions
+- **Lightweight**: Faster build times with Vite bundler
 
 ## 🏗️ Architecture
 
@@ -124,6 +171,9 @@ contract ConfidentialFlightBooking {
 
 ### Technology Stack
 
+#### Frontend Implementations
+
+**Next.js Version** (Main Application)
 ```
 Frontend (Next.js 14)
     ├── React 18 (UI Components)
@@ -132,13 +182,28 @@ Frontend (Next.js 14)
     ├── fhevmjs (FHE Encryption)
     ├── viem (Ethereum Library)
     └── Tailwind CSS (Styling)
+```
 
-Smart Contracts (Solidity 0.8.24)
+**React + Vite Version** (Alternative Implementation - `/ConfidentialFlightBooking`)
+```
+Frontend (React 18 + Vite 5)
+    ├── React 18.2 (Modern UI Library)
+    ├── TypeScript 5.2 (Type Safety)
+    ├── Vite 5.0 (Lightning-fast Build Tool)
+    ├── ethers.js 6.7 (Ethereum Interactions)
+    ├── @fhevm/sdk 0.3 (FHE SDK Integration)
+    └── CSS3 (Modern Styling)
+```
+
+**Smart Contracts** (Solidity 0.8.24)
+```
     ├── @fhevm/solidity (FHE Library)
     ├── Zama FHEVM (Encryption Engine)
     └── PauserSet (Emergency Controls)
+```
 
-Development Tools
+**Development Tools**
+```
     ├── Hardhat (Smart Contract Development)
     ├── TypeScript (Type Safety)
     ├── ESLint + Prettier (Code Quality)
@@ -153,7 +218,14 @@ Development Tools
 - MetaMask or Web3 wallet
 - Sepolia testnet ETH
 
-### Installation
+### Choose Your Implementation
+
+This project includes **two frontend implementations**:
+
+1. **Next.js 14 Version** (`/frontend`) - Full-featured with RainbowKit, wagmi, advanced routing
+2. **React + Vite Version** (`/ConfidentialFlightBooking`) - Lightweight, fast build, @fhevm/sdk integration
+
+### Option 1: Next.js Version (Recommended)
 
 ```bash
 # Clone repository
@@ -166,26 +238,34 @@ npm install
 # Install frontend dependencies
 cd frontend
 npm install
-```
 
-### Configuration
-
-Create `.env.local` in the frontend directory:
-
-```env
+# Create .env.local
+cat > .env.local << EOF
 NEXT_PUBLIC_RPC_URL=https://sepolia.infura.io/v3/YOUR_KEY
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xfdf50F46FDD1e307F80C89d5fa5c7c1E49ddae7C
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID
-```
+EOF
 
-### Run Development Server
-
-```bash
-cd frontend
+# Run development server
 npm run dev
 ```
 
-Visit the application in your browser.
+### Option 2: React + Vite Version (Alternative)
+
+```bash
+# From project root
+cd ConfidentialFlightBooking
+
+# Install dependencies
+npm install
+
+# Update contract address in src/constants/contract.ts
+
+# Run development server
+npm run dev
+```
+
+Visit the application in your browser at `http://localhost:3000`.
 
 ## 📦 Deployment
 
@@ -289,11 +369,27 @@ Total: 48 tests | 31 passing | 10 requiring FHE mock
 - **TESTING.md** - Comprehensive testing documentation
 - **CI_CD_DOCUMENTATION.md** - CI/CD pipeline guide
 
+### Frontend Documentation
+
+**Next.js Version (`/frontend`)**
+- Full-featured implementation with App Router
+- RainbowKit wallet integration
+- wagmi hooks for Ethereum interactions
+- See `frontend/components/` for component documentation
+
+**React + Vite Version (`/ConfidentialFlightBooking`)**
+- **README.md** - Project overview and features
+- **README-REACT.md** - React implementation guide and architecture
+- Component-based architecture with custom hooks
+- @fhevm/sdk integration for FHE operations
+- See `src/components/` for component structure
+- See `src/hooks/` for custom React hooks
+
 ### Technical Documentation
 
 - **Smart Contracts**: See `contracts/` directory
-- **Frontend Components**: See `frontend/components/` directory
 - **API Documentation**: Auto-generated from TypeScript types
+- **Component Docs**: Available in each frontend implementation
 
 ## 🏆 Built with Zama FHEVM
 
@@ -318,11 +414,43 @@ FHEFlightBooking/
 ├── contracts/
 │   ├── ConfidentialFlightBooking.sol  # Main contract
 │   └── PauserSet.sol                   # Emergency controls
-├── frontend/
-│   ├── app/                            # Next.js app
+├── frontend/                          # Next.js 14 Application
+│   ├── app/                            # Next.js app router
 │   ├── components/                     # React components
 │   ├── config/                         # Configuration
 │   └── public/                         # Static assets
+├── ConfidentialFlightBooking/         # React + Vite Application
+│   ├── src/
+│   │   ├── components/                 # React components
+│   │   │   ├── Header.tsx              # App header
+│   │   │   ├── ConnectionStatus.tsx    # Wallet status
+│   │   │   ├── PrivacyNotice.tsx       # Privacy info
+│   │   │   ├── AddFlightForm.tsx       # Flight creation
+│   │   │   ├── BookFlightForm.tsx      # Flight booking
+│   │   │   ├── FlightCard.tsx          # Flight display
+│   │   │   ├── FlightList.tsx          # Flights list
+│   │   │   ├── BookingCard.tsx         # Booking display
+│   │   │   └── BookingList.tsx         # Bookings list
+│   │   ├── hooks/
+│   │   │   ├── useWallet.ts            # Wallet hook
+│   │   │   ├── useFlights.ts           # Flights hook
+│   │   │   └── useBookings.ts          # Bookings hook
+│   │   ├── types/
+│   │   │   └── index.ts                # TypeScript types
+│   │   ├── constants/
+│   │   │   └── contract.ts             # Contract config
+│   │   ├── App.tsx                     # Main component
+│   │   ├── App.css                     # Styles
+│   │   └── main.tsx                    # Entry point
+│   ├── contracts/
+│   │   └── ConfidentialFlightBooking.sol
+│   ├── public/
+│   │   └── legacy/                     # Original HTML/JS
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── README.md                       # Project overview
+│   └── README-REACT.md                 # React implementation guide
 ├── test/
 │   └── ConfidentialFlightBooking.test.cjs
 ├── scripts/
@@ -332,6 +460,8 @@ FHEFlightBooking/
 ```
 
 ### Build Commands
+
+#### Smart Contract Commands
 
 ```bash
 # Compile smart contracts
@@ -343,13 +473,46 @@ npm run test
 # Deploy to Sepolia
 npm run deploy:sepolia
 
-# Build frontend
-cd frontend && npm run build
-
 # Type check
 npm run typecheck
 
 # Lint code
+npm run lint
+```
+
+#### Frontend Commands
+
+**Next.js Version:**
+```bash
+cd frontend
+
+# Development
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Lint
+npm run lint
+```
+
+**React + Vite Version:**
+```bash
+cd ConfidentialFlightBooking
+
+# Development
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint
 npm run lint
 ```
 

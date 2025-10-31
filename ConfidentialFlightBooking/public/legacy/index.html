@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure and private flight booking system using blockchain technology and zero-knowledge encryption">
+    <meta name="keywords" content="flight booking, blockchain, privacy, encryption, zero-knowledge">
+    <meta name="author" content="PrivateAir">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
+    <title>PrivateAir - Confidential Flight Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            transition: background 1s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .flights-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .flight-card {
+            background: #f8f9ff;
+            border: 2px solid #e1e8ed;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .flight-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .route {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .price {
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .flight-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.booked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .bookings-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 30px;
+        }
+
+        .booking-card {
+            background: #f8f9ff;
+            border: 2px solid #e1e8ed;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .booking-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        .privacy-notice {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .privacy-notice h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .privacy-notice p {
+            color: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .flight-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✈️ PrivateAir</h1>
+            <p>Confidential Flight Booking with Zero-Knowledge Privacy</p>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            <span id="connectionText">Disconnected</span>
+        </div>
+
+        <div class="privacy-notice">
+            <h3>🔒 Privacy Protected</h3>
+            <p>Your personal data, seat preferences, and payment information are encrypted using advanced cryptographic techniques. Only you can access your private booking details.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>🛫 Add Flight</h2>
+                <form id="addFlightForm">
+                    <div class="form-group">
+                        <label for="origin">Origin Airport</label>
+                        <input type="text" id="origin" placeholder="e.g., New York JFK" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination Airport</label>
+                        <input type="text" id="destination" placeholder="e.g., London LHR" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departureTime">Departure Time</label>
+                        <input type="datetime-local" id="departureTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="arrivalTime">Arrival Time</label>
+                        <input type="datetime-local" id="arrivalTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalSeats">Total Seats</label>
+                        <input type="number" id="totalSeats" min="1" max="400" placeholder="180" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="basePrice">Base Price (ETH)</label>
+                        <input type="number" id="basePrice" step="0.001" min="0" placeholder="0.1" required>
+                    </div>
+                    <button type="submit" class="btn">Add Flight</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>🎫 Book Flight</h2>
+                <form id="bookFlightForm">
+                    <div class="form-group">
+                        <label for="flightId">Flight ID</label>
+                        <input type="number" id="flightId" min="1" placeholder="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passportNumber">Passport Number (Encrypted)</label>
+                        <input type="number" id="passportNumber" placeholder="123456789" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerName">Passenger Name (Encrypted)</label>
+                        <input type="text" id="passengerName" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerAge">Age</label>
+                        <input type="number" id="passengerAge" min="1" max="120" placeholder="25" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredSeat">Preferred Seat Number</label>
+                        <input type="number" id="preferredSeat" min="1" placeholder="12A (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="specialNeeds"> Special Assistance Required
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentAmount">Payment Amount (ETH)</label>
+                        <input type="number" id="paymentAmount" step="0.001" min="0" placeholder="0.1" required>
+                    </div>
+                    <button type="submit" class="btn">Book Flight</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bookings-section">
+            <h2>Available Flights</h2>
+            <div class="flights-grid" id="flightsGrid">
+                <p>Loading flights...</p>
+            </div>
+        </div>
+
+        <div class="bookings-section">
+            <h2>My Bookings</h2>
+            <div id="bookingsGrid">
+                <p>Connect wallet to view your bookings</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+    <script>
+        // Random color generator functions
+        function getRandomColor() {
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+                '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+                '#A3E4DB', '#FAD7A0', '#D5A6BD', '#A9DFBF', '#F9E79F',
+                '#AED6F1', '#D2B4DE', '#A2D9CE', '#FADBD8', '#D5DBDB'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function getRandomGradient() {
+            const color1 = getRandomColor();
+            const color2 = getRandomColor();
+            const angles = [45, 90, 135, 180, 225, 270, 315];
+            const angle = angles[Math.floor(Math.random() * angles.length)];
+            return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 100%)`;
+        }
+
+        function changeRandomColors() {
+            // Change body background
+            document.body.style.background = getRandomGradient();
+
+            // Change button colors
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.style.background = getRandomGradient();
+            });
+
+            // Change card header colors
+            const headers = document.querySelectorAll('.card h2');
+            headers.forEach(header => {
+                header.style.color = getRandomColor();
+            });
+
+            // Change booking ID colors
+            const bookingIds = document.querySelectorAll('.booking-id');
+            bookingIds.forEach(id => {
+                id.style.color = getRandomColor();
+            });
+
+            // Change focus border colors
+            const focusColor = getRandomColor();
+            const style = document.createElement('style');
+            style.textContent = `
+                .form-group input:focus,
+                .form-group select:focus {
+                    border-color: ${focusColor} !important;
+                }
+                .flight-card:hover {
+                    border-color: ${focusColor} !important;
+                }
+            `;
+
+            // Remove previous dynamic styles and add new one
+            const oldStyle = document.getElementById('dynamic-colors');
+            if (oldStyle) oldStyle.remove();
+            style.id = 'dynamic-colors';
+            document.head.appendChild(style);
+        }
+
+        // Change colors every 10 seconds automatically
+        setInterval(changeRandomColors, 10000);
+
+        // Initial random colors when page loads
+        window.addEventListener('load', () => {
+            setTimeout(changeRandomColors, 1000);
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
